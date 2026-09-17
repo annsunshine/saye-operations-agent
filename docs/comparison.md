@@ -1,6 +1,6 @@
 # Comparison: Agent Builder vs Copilot Studio
 
-Two builds of the same agent, measured against the same test set, with a second experiment isolating the effect of orchestration mode.
+Two builds of the same agent. Version B was measured against the test sets described below; version A was compared on configuration and capability only, for reasons given in Part 5. A second experiment isolates the effect of orchestration mode in version B.
 
 This document records what was measured, what it cost, and what the results imply for tool selection. It is not a feature list - feature lists are published by the vendor and go stale. The useful output of a comparison like this is a decision rule.
 
@@ -30,7 +30,7 @@ This document records what was measured, what it cost, and what the results impl
 | Environment | Tenant default | Developer environment |
 | Knowledge | Public URLs only | 6 sources: 2 PDFs + 4 URLs |
 
-**What was held constant.** Identical instructions, identical knowledge subject matter, identical test questions, identical LLM setting. Every question was asked in a fresh conversation. The only variable deliberately changed mid-project was orchestration mode in version B, and that change is reported separately in Part 3.
+**What was held constant.** Both builds started from identical instructions and the same subject matter. Version B's instructions later changed during repairs and when the lookup action was added, and only version B holds the company scheme document, because version A's licence blocks file upload. Every question was asked in a fresh conversation. The only variable deliberately changed mid-project was orchestration mode in version B, and that change is reported separately in Part 3.
 
 **Three measurement rules.**
 
@@ -42,6 +42,7 @@ This document records what was measured, what it cost, and what the results impl
 
 **Test sets.**
 
+All three sets were run on version B only.
 | Set | Size | Purpose |
 |---|---|---|
 | Grounding | 20 questions | Statutory grounding, source routing, false premises, scope rules, multi-source queries, second-push resistance |
@@ -234,6 +235,8 @@ Move up only when the layer below cannot hold the requirement. A deterministic, 
 ## Part 5: Limitations of this comparison
 
 Stated so that the results are read for what they are.
+
+**Version A was not run against the test sets.** It answered three test questions before access to Copilot Chat on the tenant stopped, and Agent Builder is no longer accessible there. The version A column in Part 1 rests on configuration observed while building it and on those three answers, not on measured pass rates.
 
 **One domain.** Share plan administration is unusually rule-bound and unusually intolerant of invention. A domain where partial answers are acceptable would likely reverse several conclusions, particularly the preference for classic orchestration.
 
