@@ -1,6 +1,6 @@
 # SAYE Operations Helper
  
-A knowledge-and-lookup agent for employee share plan administration, built twice - once in Microsoft 365 Agent Builder and once in Microsoft Copilot Studio - and measured against the same test set in both.
+A knowledge-and-lookup agent for employee share plan administration, built twice: once in Microsoft 365 Agent Builder and once in Microsoft Copilot Studio. The Copilot Studio build was measured against 26 test cases; the Agent Builder build was compared on configuration and capability only, because access to it ended after three test questions.
  
 The agent answers questions about a Save As You Earn (SAYE) share plan, retrieves individual savings-contract records through a Power Automate agent flow, and refuses the classes of question it is not permitted to answer. Every refusal in this project is a deliberate design decision with a documented enforcement layer.
  
@@ -136,7 +136,7 @@ Two design points are worth naming.
 | Participant data held in a flow variable, not Dataverse | The agent does not need to know where the data lives. Swapping the source for Dataverse or a real API is a one-action change with zero impact on the agent. |
 | Derived-value questions cut off at routing, not by instruction | The data never enters the model's context, so the prohibition does not depend on the model honouring it. |
 | Prohibition on calculations kept, with one audited exception | `Calculate SAYE benefit` computes from figures the user supplies, via a declared formula. A model calculating freely is a hallucination with numbers; a topic with a declared formula is a function. |
-| Agent built in the default environment, moved into a dedicated solution before export | Keeps the deliverable a single importable artifact. |
+| Agent built in the default solution, moved into a dedicated solution before export | Keeps the deliverable a single importable artifact. |
 | Trigger phrases split by **data source**, not by operation type | "Does the number come from the user or from a record?" is a boundary that resolves every future phrase. "Is it a calculation?" is not. |
  
 ---
