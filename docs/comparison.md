@@ -202,6 +202,26 @@ Generative orchestration is not less accurate. It is less governable.
 
 ## Part 4: Orchestration mode, second run (tuned)
 
+```mermaid
+flowchart TD
+    U["User message"]
+
+    subgraph C["Classic orchestration"]
+        C1["Trigger phrase match"] --> C2["Topic runs<br/>entities fill slots from the sentence"]
+        C2 --> C3["Topic replies to the user"]
+    end
+
+    subgraph G["Generative orchestration"]
+        G1["Planner reads topic<br/>and tool descriptions"] --> G2["Topic runs<br/>question nodes ask every time"]
+        G2 --> G3["Topic replies to the user"]
+        G3 --> G4["answered = true"]
+        G4 --> G5["Orchestration layer replies<br/>only if something is unanswered"]
+    end
+
+    U --> C1
+    U --> G1
+```
+
 The first run compared classic and generative orchestration on default
 settings. Generative failed two cases: it routed a calculation request to the
 calculator after a record lookup, and it reworded the flow's sentence instead
