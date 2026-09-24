@@ -12,8 +12,9 @@ This document records what was measured, what it cost, and what the results impl
 - [Part 1: Agent Builder vs Copilot Studio](#part-1-agent-builder-vs-copilot-studio)
 - [Part 2: The failure log](#part-2-the-failure-log)
 - [Part 3: Classic vs generative orchestration](#part-3-classic-vs-generative-orchestration)
-- [Part 4: Decision framework](#part-4-decision-framework)
-- [Part 5: Limitations of this comparison](#part-5-limitations-of-this-comparison)
+- [Part 4: Orchestration mode, second run (tuned)](#part-4-orchestration-mode-second-run-tuned)
+- [Part 5: Decision framework](#part-5-decision-framework)
+- [Part 6: Limitations of this comparison](#part-6-limitations-of-this-comparison)
 
 ---
 
