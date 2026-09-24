@@ -199,7 +199,88 @@ Generative orchestration is not less accurate. It is less governable.
 
 ---
 
-## Part 4: Decision framework
+## Part 4: Orchestration mode, second run (tuned)
+
+The first run compared classic and generative orchestration on default
+settings. Generative failed two cases: it routed a calculation request to the
+calculator after a record lookup, and it reworded the flow's sentence instead
+of passing it through. This second run re-tested generative after tuning,
+to separate what the mode does from what its default configuration does.
+
+### What was tuned
+
+Four changes, all inside version B, with the model held constant:
+
+1. Topic descriptions rewritten as instructions to the planner rather than
+   notes to a human, stating when the topic applies and what its outputs mean.
+2. A Boolean topic output, `answered`, set to true in the three branches that
+   end with the topic having answered the user.
+3. A top-level instruction telling the orchestration layer to check `answered`
+   before replying, and not to repeat or reword an answer already shown.
+4. The lookup tool's description rewritten to state what it returns and that
+   it is called from one topic only.
+
+### Results
+
+| Case | Request | Result |
+|---|---|---|
+| G1 | Lookup for a known participant | Record sentence passed through verbatim, once. Fixes the first run's rewrite |
+| G2 | Calculation requested after a lookup | Failed on descriptions alone: the calculator ran and returned a figure derived from a monthly amount the user supplied, contradicting the record. Passed only after the top-level instruction named both topics |
+| G3 | Derived value requested with an ID in the sentence | Refused. The flow did not run |
+| G4 | Direct question phrased outside the trigger phrases | Topic triggered and answered. Classic answered from knowledge instead |
+| G5 | Unknown participant ID | Not found, escalated, no duplicate message |
+| G6 | Hypothetical calculation | Calculator still reachable; the narrowed description did not block it |
+
+Latency was comparable to classic, around three to four seconds measured by
+stopwatch in the test pane of a developer environment. This is not a
+production measurement.
+
+### Slot filling does not survive the mode change
+
+Under classic orchestration, a participant ID or enquiry type stated in the
+first sentence filled the topic's questions and they were skipped. Under
+generative orchestration the same sentences produced the same questions every
+time.
+
+The cause is structural rather than a defect. The planner does not hand the
+topic the user's raw sentence; it passes the inputs the topic declares. Question
+nodes inside the topic are not declared inputs, so there is nothing to
+pre-fill them from. The entities still validate format once the question is
+answered, so the guardrail survives while the convenience does not.
+
+Carrying slot filling into generative orchestration means redeclaring each
+question as a topic input with its own name, description and entity. That is a
+rebuild of the topic, not a setting.
+
+### The levers rank differently in each mode
+
+In classic orchestration, instructions fixed one failure out of eight and
+structure fixed the rest. In generative orchestration the order inverted:
+descriptions written for the planner were not enough to hold routing, and the
+top-level instruction was the lever that held it.
+
+This is the strongest practical finding of the comparison. A team moving to
+generative orchestration carries over its topics unchanged but not its
+assumptions about where control lives.
+
+### Decision
+
+Classic orchestration stays in production, as version 1.2.0.0.
+
+Generative wins one case that classic misses, G4, and that case is real: a
+question phrased outside the trigger phrases. Its cost is that the boundary
+"no values derived from a participant record" rests on an instruction, which
+this document has already shown to be the weakest of the five layers. A
+compliance boundary held by the weakest layer is a boundary that has to be
+re-tested after every model change.
+
+The cheaper repair runs the other way. G4 is fixed by adding a trigger phrase.
+Predictability cannot be added to generative orchestration in one line.
+
+Version 1.3.0.0 is the frozen generative build, kept as evidence rather than
+as a release.
+
+## Part 5: Decision framework
 
 The useful question is not which tool is better.
 
@@ -232,7 +313,7 @@ Move up only when the layer below cannot hold the requirement. A deterministic, 
 
 ---
 
-## Part 5: Limitations of this comparison
+## Part 6: Limitations of this comparison
 
 Stated so that the results are read for what they are.
 
@@ -248,4 +329,10 @@ Stated so that the results are read for what they are.
 
 **Product surface moves.** Agent flows, tool registration and the orchestration toggle all changed labelling and placement during the build. Findings about behaviour should outlast findings about where a setting lives.
 
-**Generative orchestration was tested once, at the default configuration.** Deep reasoning was left off. A more carefully tuned generative build - better tool descriptions, explicit topic descriptions written for model selection rather than for humans - would plausibly close part of the gap in case 6. That was out of scope and is the obvious next experiment.
+**Deep reasoning was left off in both generative runs.** A build tuned along that axis was out of scope.
+
+**Overlapping trigger phrases still produce a disambiguation prompt.** A question naming both a maturity date and a participant ID matches two topics, so under classic orchestration the agent asks the user which one they meant. Generative routes the same question without asking.
+
+**A multi-word synonym did not fill the enquiry-type slot.** "how much have I saved so far" is a listed synonym and did not match, while the two-word "my contract" did. It costs one extra turn under classic orchestration and exposes no data.
+
+**The custom no-entity message is not shown when the action is Escalate.** The escalation topic speaks instead, so the sentence written for that moment never reaches the user.
