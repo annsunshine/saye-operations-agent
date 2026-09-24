@@ -138,6 +138,8 @@ Two design points are worth naming.
 | Prohibition on calculations kept, with one audited exception | `Calculate SAYE benefit` computes from figures the user supplies, via a declared formula. A model calculating freely is a hallucination with numbers; a topic with a declared formula is a function. |
 | Agent built in the default solution, moved into a dedicated solution before export | Keeps the deliverable a single importable artifact. |
 | Trigger phrases split by **data source**, not by operation type | "Does the number come from the user or from a record?" is a boundary that resolves every future phrase. "Is it a calculation?" is not. |
+| Classic orchestration in production. | Generative was measured twice, tuned the second time, and wins one routing case. It was not adopted because the boundary against derived values would then rest on a top-level instruction rather than on a condition inside the topic. |
+| The topic shows the record sentence itself rather than returning it for the orchestration layer to phrase. | The sentence is a record extract and has to reach the user unchanged. |
  
 ---
  
@@ -299,7 +301,7 @@ Documented deliberately. Each one has a stated remediation.
 | Limitation | Remediation |
 |---|---|
 | Tools run under the **author's credentials** - the agent cannot distinguish who is asking, so anyone who knows an employee ID can retrieve that record | Bind the lookup to the signed-in user's identity rather than to a value typed into the conversation |
-| No format validation on the employee ID - any string is accepted | Custom entity with a pattern (`NW` + 4 digits) |
+| A regex entity validates the participant ID before the flow runs. A malformed ID gets one reprompt showing the expected format, and a second failure escalates instead of returning "not found". |
 | Usage telemetry recorded nothing over seven days, so cost per conversation could not be attributed | Requires an environment with allocated capacity and a realistic conversation volume |
  
 ---
@@ -322,7 +324,11 @@ Documented deliberately. Each one has a stated remediation.
     └── refusal-before-lookup.png
 ```
  
-Download the exported solution: [**SAYEOperationsAgent_1_1_0_0.zip**](solution/SAYEOperationsAgent_1_1_0_0.zip). It is unmanaged, so every component stays editable after import.
+Download the exported solution. All three exports are unmanaged, so every component stays editable after import.
+
+- [SAYEOperationsAgent_1_2_0_0.zip](solution/SAYEOperationsAgent_1_2_0_0.zip) - classic orchestration with custom entities and format validation. This is the published build.
+- [SAYEOperationsAgent_1_3_0_0.zip](solution/SAYEOperationsAgent_1_3_0_0.zip) - tuned generative orchestration, exported as evidence for Part 4 of the comparison. Not published.
+- [SAYEOperationsAgent_1_1_0_0.zip](solution/SAYEOperationsAgent_1_1_0_0.zip) - classic orchestration before custom entities.
  
 The scheme document was written with values that deliberately contradict statutory guidance (a £250 monthly cap against the statutory £500, three-year contracts only, a 15% discount). That makes every grounding question a binary test: an answer citing £500 came from the model's training, an answer citing £250 came from the document.
  
@@ -333,4 +339,8 @@ The scheme document was written with values that deliberately contradict statuto
 **A retrieval that finds nothing does not return an error - it returns an answer from memory.** There is no "I didn't find it" state; that state has to be built. Every anti-hallucination pattern in this project reduces to creating it somewhere: a verbatim refusal sentence in the instructions, an explicit branch in the flow, an edited Fallback topic.
  
 **"Don't make things up" does not work as an instruction.** The model cannot tell which part of its own answer came from a document and which came from training. A negative instruction with no defined alternative has nowhere to go. Naming the exact sentence to produce when nothing is found was the single highest-impact change in the entire build.
+
+**Slot filling does not carry across orchestration modes.** Under classic, an ID stated in the first sentence skipped the question; under generative the same sentence still produced it, because the planner passes declared topic inputs rather than the raw utterance.
+
+**The lever that fixes a routing problem depends on the mode.** Under classic, structure fixed almost everything and instructions fixed one case in eight. Under generative, descriptions written for the planner were not enough and a top-level instruction was what held routing.
  
